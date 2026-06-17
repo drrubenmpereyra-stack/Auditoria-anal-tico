@@ -2,20 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Consulta</title>
+    <title>Consulta de Analíticos</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { background: #050508; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 50px; }
+        .container { width: 100%; max-width: 400px; text-align: center; background: #111; padding: 40px; border-radius: 10px; border: 1px solid #333; }
+        input { width: 90%; padding: 12px; margin: 20px 0; border-radius: 5px; border: 1px solid #444; background: #1a1a1a; color: white; text-align: center; font-size: 16px; }
+        button { padding: 12px 30px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; font-size: 14px; }
+        .btn-consultar { background: #D4AF37; color: black; }
+        .btn-descarga { background: #2563eb; color: white; display: none; }
+        .btn-salir { background: #444; color: white; }
+    </style>
 </head>
 <body>
 
-    <img src="visanal.png" style="display:block; margin: 20px auto; width: 150px;">
-    
-    <div style="text-align:center; margin-top:20px;">
+    <img src="visanal.png" alt="Visado" style="width: 180px; margin-bottom: 30px;">
+
+    <div class="container">
+        <h3>Consulta de Analítico</h3>
         <input type="text" id="nombreInput" placeholder="Rios Graciela">
-        <button onclick="consultar()">Consultar analítico</button>
+        <br>
+        <button class="btn-consultar" onclick="consultar()">Consultar analítico</button>
         <p id="resultado"></p>
-        <button id="btnDescarga" style="display:none;" onclick="abrirDrive()">Descarga PDF</button>
-        <button onclick="window.close()">Salir</button>
+        <button id="btnDescarga" class="btn-descarga" onclick="abrirLink()">Descarga PDF</button>
+        <button class="btn-salir" onclick="window.close()">Salir</button>
     </div>
 
     <script>
@@ -47,25 +58,27 @@
             const btn = document.getElementById('btnDescarga');
 
             try {
-                // Consulta directa a la colección y campo
                 const snap = await db.collection("visado_analítico").where("estudiante", "==", nombre).get();
 
-                if (!snap.empty) {
+                if (!snap.empty && links[nombre]) {
                     res.innerText = "Su analítico ya se encuentra generado, vaya al botón de descarga";
+                    res.style.color = "#22c55e";
                     btn.style.display = "inline-block";
                     btn.dataset.url = links[nombre];
                 } else {
                     res.innerText = "No se encontraron datos de analítico, comunicarse con Dirección";
+                    res.style.color = "#ef4444";
                     btn.style.display = "none";
                 }
             } catch (e) {
-                res.innerText = "Error en la consulta";
+                res.innerText = "Error de conexión.";
             }
         }
 
-        function abrirDrive() {
+        function abrirLink() {
             const url = document.getElementById('btnDescarga').dataset.url;
-            window.open(url, '_blank');
+            // Forzamos que se abra en una ventana nueva y tratada como URL externa
+            if (url) window.open(url, '_blank', 'noopener,noreferrer');
         }
     </script>
 </body>
