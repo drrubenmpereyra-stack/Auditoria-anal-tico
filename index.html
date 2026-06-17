@@ -5,6 +5,7 @@
     <title>Consulta de Analíticos</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
     <style>
         body { background: #050508; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 50px; }
         .container { width: 100%; max-width: 400px; text-align: center; background: #111; padding: 40px; border-radius: 10px; border: 1px solid #333; }
@@ -14,22 +15,9 @@
         .btn-descarga { background: #2563eb; color: white; display: none; }
         .btn-salir { background: #444; color: white; }
     </style>
-</head>
-<body>
-
-    <img src="visanal.png" alt="Visado" style="width: 180px; margin-bottom: 30px;">
-
-    <div class="container">
-        <h3>Consulta de Analítico</h3>
-        <input type="text" id="nombreInput" placeholder="Rios Graciela">
-        <br>
-        <button class="btn-consultar" onclick="consultar()">Consultar analítico</button>
-        <p id="resultado"></p>
-        <button id="btnDescarga" class="btn-descarga" onclick="abrirLink()">Descarga PDF</button>
-        <button class="btn-salir" onclick="window.close()">Salir</button>
-    </div>
 
     <script>
+        // INICIALIZACIÓN FUERA DE CUALQUIER FUNCIÓN
         const firebaseConfig = {
             apiKey: "AIzaSyD47_2UtWLFI_VRVvvXVAqn4zZzZ4d1ggo",
             authDomain: "av-clinica-convergencia.firebaseapp.com",
@@ -39,10 +27,10 @@
             messagingSenderId: "939404425675",
             appId: "1:939404425675:web:8cfae157099efabd741e4e"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
+        
+        // Diccionario Global
         const links = {
             "RIOS Graciela": "https://drive.google.com/drive/folders/1da5V0BKy4FghsOCz7B66mNOz7ZTFMKt5?usp=drive_link",
             "SCHWAB Gisela": "https://drive.google.com/drive/folders/1xDl_o19beXQrXMo4AdLBF4TWmEHkqwYb?usp=drive_link",
@@ -52,34 +40,43 @@
             "PRAVAZ Emilia": "https://drive.google.com/drive/folders/1S9em-SWYKJcDn_ntTBznWgviHVjP5x5n?usp=sharing"
         };
 
+        let urlEncontrada = "";
+
         async function consultar() {
             const nombre = document.getElementById('nombreInput').value.trim();
             const res = document.getElementById('resultado');
             const btn = document.getElementById('btnDescarga');
 
             try {
+                // Consulta directa y plana
                 const snap = await db.collection("visado_analítico").where("estudiante", "==", nombre).get();
 
                 if (!snap.empty && links[nombre]) {
                     res.innerText = "Su analítico ya se encuentra generado, vaya al botón de descarga";
                     res.style.color = "#22c55e";
                     btn.style.display = "inline-block";
-                    btn.dataset.url = links[nombre];
+                    urlEncontrada = links[nombre];
                 } else {
                     res.innerText = "No se encontraron datos de analítico, comunicarse con Dirección";
                     res.style.color = "#ef4444";
                     btn.style.display = "none";
                 }
             } catch (e) {
-                res.innerText = "Error de conexión.";
+                res.innerText = "Error en la consulta: " + e.message;
             }
         }
-
-        function abrirLink() {
-            const url = document.getElementById('btnDescarga').dataset.url;
-            // Forzamos que se abra en una ventana nueva y tratada como URL externa
-            if (url) window.open(url, '_blank', 'noopener,noreferrer');
-        }
     </script>
+</head>
+<body>
+    <img src="visanal.png" alt="Visado" style="width: 180px; margin-bottom: 30px;">
+    <div class="container">
+        <h3>Consulta de Analítico</h3>
+        <input type="text" id="nombreInput" placeholder="Rios Graciela">
+        <br>
+        <button class="btn-consultar" onclick="consultar()">Consultar analítico</button>
+        <p id="resultado"></p>
+        <button id="btnDescarga" class="btn-descarga" onclick="window.open(urlEncontrada, '_blank')">Descarga PDF</button>
+        <button class="btn-salir" onclick="window.close()">Salir</button>
+    </div>
 </body>
 </html>
