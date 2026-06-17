@@ -2,15 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Consulta de Analítico</title>
+    <title>Consulta de Analíticos</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
     <style>
         body { background: #050508; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 50px; }
         .container { width: 100%; max-width: 400px; text-align: center; background: #111; padding: 40px; border-radius: 10px; border: 1px solid #333; }
         input { width: 90%; padding: 12px; margin: 20px 0; border-radius: 5px; border: 1px solid #444; background: #1a1a1a; color: white; text-align: center; font-size: 16px; }
         button { padding: 12px 30px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; font-size: 14px; }
         .btn-consultar { background: #D4AF37; color: black; }
+        .btn-descarga { background: #2563eb; color: white; }
         .btn-salir { background: #444; color: white; }
     </style>
 </head>
@@ -24,6 +26,7 @@
         <br>
         <button class="btn-consultar" onclick="consultar()">Consultar analítico</button>
         <p id="resultado"></p>
+        <button class="btn-descarga" onclick="abrirCarpeta()">Descarga PDF</button>
         <button class="btn-salir" onclick="window.close()">Salir</button>
     </div>
 
@@ -41,6 +44,15 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        const links = {
+            "RIOS Graciela": "https://drive.google.com/drive/folders/1da5V0BKy4FghsOCz7B66mNOz7ZTFMKt5?usp=drive_link",
+            "SCHWAB Gisela": "https://drive.google.com/drive/folders/1xDl_o19beXQrXMo4AdLBF4TWmEHkqwYb?usp=drive_link",
+            "STEFANINI BENZO Romina": "https://drive.google.com/drive/folders/1PioVY2n5eJp7W1-c-yLqVzHkiXfNbEzh?usp=drive_link",
+            "RODRIGUEZ Ramiro": "https://drive.google.com/drive/folders/1kixAS7AqD1zr3pDYKC4mjBBW0sqNimx0?usp=drive_link",
+            "CAON Federico": "https://drive.google.com/drive/folders/1LnnPq0w7P81ShMJsG3MNoLkfhktakV6v?usp=drive_link",
+            "PRAVAZ Emilia": "https://drive.google.com/drive/folders/1S9em-SWYKJcDn_ntTBznWgviHVjP5x5n?usp=sharing"
+        };
+
         async function consultar() {
             const input = document.getElementById('nombreInput').value.trim();
             const res = document.getElementById('resultado');
@@ -50,8 +62,6 @@
 
             try {
                 const snapshot = await db.collection("visado_analítico").get();
-                
-                // Busca si existe algún documento donde 'estudiante' coincida con el input
                 const existe = snapshot.docs.some(doc => doc.data().estudiante === input);
 
                 if (existe) {
@@ -62,7 +72,16 @@
                     res.style.color = "#ef4444";
                 }
             } catch (e) {
-                res.innerText = "Error al consultar: " + e.message;
+                res.innerText = "Error: " + e.message;
+            }
+        }
+
+        function abrirCarpeta() {
+            const input = document.getElementById('nombreInput').value.trim();
+            if (links[input]) {
+                window.open(links[input], '_blank');
+            } else {
+                alert("Alumno no encontrado en el sistema de descargas.");
             }
         }
     </script>
