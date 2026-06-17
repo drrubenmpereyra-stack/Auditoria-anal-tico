@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta de Analíticos</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body { background: #050508; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 20px; }
+        .container { width: 100%; max-width: 400px; text-align: center; background: #111; padding: 30px; border-radius: 10px; border: 1px solid #333; }
+        input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 5px; border: 1px solid #444; background: #1a1a1a; color: white; text-align: center; }
+        button { padding: 12px 25px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-consultar { background: #D4AF37; color: black; }
+        .btn-descarga { background: #2563eb; color: white; display: none; }
+        .btn-salir { background: #555; color: white; }
+    </style>
+</head>
+<body>
+
+    <img src="visanal.png" alt="Visado" style="width: 150px; margin-bottom: 20px;">
+
+    <div class="container">
+        <h3>Consulta de Analítico</h3>
+        <p style="font-size: 0.8em; color: #888;">Ingrese Apellido y Nombre (ej: Rios Graciela)</p>
+        
+        <input type="text" id="nombreInput" placeholder="Apellido Nombre">
+        <br>
+        <button class="btn-consultar" onclick="consultarAnalitico()">Consultar analítico</button>
+        
+        <p id="resultado" style="margin: 20px 0;"></p>
+        
+        <button id="btnDescarga" class="btn-descarga" onclick="abrirLink()">Descarga PDF</button>
+        <button class="btn-salir" onclick="window.close()">Salir</button>
+    </div>
+
+    <script>
+        // Configuración Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD47_2UtWLFI_VRVvvXVAqn4zZzZ4d1ggo",
+            authDomain: "av-clinica-convergencia.firebaseapp.com",
+            projectId: "av-clinica-convergencia",
+            storageBucket: "av-clinica-convergencia.firebasestorage.app",
+            messagingSenderId: "939404425675",
+            appId: "1:939404425675:web:8cfae157099efabd741e4e"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Diccionario de enlaces
+        const linksAnaliticos = {
+            "RIOS Graciela": "https://drive.google.com/drive/folders/1da5V0BKy4FghsOCz7B66mNOz7ZTFMKt5?usp=drive_link",
+            "SCHWAB Gisela": "https://drive.google.com/drive/folders/1xDl_o19beXQrXMo4AdLBF4TWmEHkqwYb?usp=drive_link",
+            "STEFANINI BENZO Romina": "https://drive.google.com/drive/folders/1PioVY2n5eJp7W1-c-yLqVzHkiXfNbEzh?usp=drive_link",
+            "RODRIGUEZ Ramiro": "https://drive.google.com/drive/folders/1kixAS7AqD1zr3pDYKC4mjBBW0sqNimx0?usp=drive_link",
+            "CAON Federico": "https://drive.google.com/drive/folders/1LnnPq0w7P81ShMJsG3MNoLkfhktakV6v?usp=drive_link",
+            "PRAVAZ Emilia": "https://drive.google.com/drive/folders/1S9em-SWYKJcDn_ntTBznWgviHVjP5x5n?usp=sharing"
+        };
+
+        async function consultarAnalitico() {
+            const nombre = document.getElementById('nombreInput').value.trim();
+            const resLabel = document.getElementById('resultado');
+            const btnDescarga = document.getElementById('btnDescarga');
+
+            if (!nombre) return;
+
+            resLabel.innerText = "Consultando...";
+            btnDescarga.style.display = "none";
+
+            try {
+                // Consulta en la colección visado_analítico
+                const snapshot = await db.collection("visado_analítico")
+                                         .where("estudiante", "==", nombre)
+                                         .get();
+
+                if (!snapshot.empty && linksAnaliticos[nombre]) {
+                    resLabel.innerText = "Su analítico ya se encuentra generado, vaya al botón de descarga";
+                    resLabel.style.color = "#22c55e";
+                    btnDescarga.style.display = "inline-block";
+                    btnDescarga.dataset.url = linksAnaliticos[nombre];
+                } else {
+                    resLabel.innerText = "No se encontraron datos de analítico, comunicarse con Dirección";
+                    resLabel.style.color = "#ef4444";
+                }
+            } catch (e) {
+                resLabel.innerText = "Error de conexión. Intente nuevamente.";
+                console.error(e);
+            }
+        }
+
+        function abrirLink() {
+            const url = document.getElementById('btnDescarga').dataset.url;
+            if (url) window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
