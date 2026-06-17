@@ -2,10 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Consulta de Analíticos</title>
+    <title>Consulta de Analítico</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    
     <style>
         body { background: #050508; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding-top: 50px; }
         .container { width: 100%; max-width: 400px; text-align: center; background: #111; padding: 40px; border-radius: 10px; border: 1px solid #333; }
@@ -14,6 +13,19 @@
         .btn-consultar { background: #D4AF37; color: black; }
         .btn-salir { background: #444; color: white; }
     </style>
+</head>
+<body>
+
+    <img src="visanal.png" alt="Visado" style="width: 180px; margin-bottom: 30px;">
+
+    <div class="container">
+        <h3>Consulta de Analítico</h3>
+        <input type="text" id="nombreInput" placeholder="Rios Graciela">
+        <br>
+        <button class="btn-consultar" onclick="consultar()">Consultar analítico</button>
+        <p id="resultado"></p>
+        <button class="btn-salir" onclick="window.close()">Salir</button>
+    </div>
 
     <script>
         const firebaseConfig = {
@@ -30,19 +42,19 @@
         const db = firebase.firestore();
 
         async function consultar() {
-            const nombreInput = document.getElementById('nombreInput').value.trim();
+            const input = document.getElementById('nombreInput').value.trim();
             const res = document.getElementById('resultado');
 
+            if (!input) return;
             res.innerText = "Consultando...";
 
             try {
-                // Consulta directa a la colección para validar el registro
                 const snapshot = await db.collection("visado_analítico").get();
                 
-                // Filtramos en memoria buscando coincidencia exacta
-                const alumnoEncontrado = snapshot.docs.find(doc => doc.data().estudiante === nombreInput);
+                // Busca si existe algún documento donde 'estudiante' coincida con el input
+                const existe = snapshot.docs.some(doc => doc.data().estudiante === input);
 
-                if (alumnoEncontrado) {
+                if (existe) {
                     res.innerText = "Su analítico ya se encuentra generado.";
                     res.style.color = "#22c55e";
                 } else {
@@ -50,20 +62,9 @@
                     res.style.color = "#ef4444";
                 }
             } catch (e) {
-                res.innerText = "Error de conexión: " + e.message;
+                res.innerText = "Error al consultar: " + e.message;
             }
         }
     </script>
-</head>
-<body>
-    <img src="visanal.png" alt="Visado" style="width: 180px; margin-bottom: 30px;">
-    <div class="container">
-        <h3>Consulta de Analítico</h3>
-        <input type="text" id="nombreInput" placeholder="Rios Graciela">
-        <br>
-        <button class="btn-consultar" onclick="consultar()">Consultar analítico</button>
-        <p id="resultado"></p>
-        <button class="btn-salir" onclick="window.close()">Salir</button>
-    </div>
 </body>
 </html>
