@@ -17,7 +17,6 @@
     </style>
 
     <script>
-        // INICIALIZACIÓN FUERA DE CUALQUIER FUNCIÓN
         const firebaseConfig = {
             apiKey: "AIzaSyD47_2UtWLFI_VRVvvXVAqn4zZzZ4d1ggo",
             authDomain: "av-clinica-convergencia.firebaseapp.com",
@@ -27,10 +26,10 @@
             messagingSenderId: "939404425675",
             appId: "1:939404425675:web:8cfae157099efabd741e4e"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
-        // Diccionario Global
         const links = {
             "RIOS Graciela": "https://drive.google.com/drive/folders/1da5V0BKy4FghsOCz7B66mNOz7ZTFMKt5?usp=drive_link",
             "SCHWAB Gisela": "https://drive.google.com/drive/folders/1xDl_o19beXQrXMo4AdLBF4TWmEHkqwYb?usp=drive_link",
@@ -40,29 +39,32 @@
             "PRAVAZ Emilia": "https://drive.google.com/drive/folders/1S9em-SWYKJcDn_ntTBznWgviHVjP5x5n?usp=sharing"
         };
 
-        let urlEncontrada = "";
-
         async function consultar() {
-            const nombre = document.getElementById('nombreInput').value.trim();
+            const nombreInput = document.getElementById('nombreInput').value.trim();
             const res = document.getElementById('resultado');
             const btn = document.getElementById('btnDescarga');
 
-            try {
-                // Consulta directa y plana
-                const snap = await db.collection("visado_analítico").where("estudiante", "==", nombre).get();
+            res.innerText = "Consultando...";
+            btn.style.display = "none";
 
-                if (!snap.empty && links[nombre]) {
+            try {
+                // Consulta total de la colección para evitar error de índices de Firebase
+                const snapshot = await db.collection("visado_analítico").get();
+                
+                // Filtramos en memoria
+                const alumnoEncontrado = snapshot.docs.find(doc => doc.data().estudiante === nombreInput);
+
+                if (alumnoEncontrado && links[nombreInput]) {
                     res.innerText = "Su analítico ya se encuentra generado, vaya al botón de descarga";
                     res.style.color = "#22c55e";
                     btn.style.display = "inline-block";
-                    urlEncontrada = links[nombre];
+                    btn.onclick = () => window.open(links[nombreInput], '_blank');
                 } else {
                     res.innerText = "No se encontraron datos de analítico, comunicarse con Dirección";
                     res.style.color = "#ef4444";
-                    btn.style.display = "none";
                 }
             } catch (e) {
-                res.innerText = "Error en la consulta: " + e.message;
+                res.innerText = "Error de conexión: " + e.message;
             }
         }
     </script>
@@ -75,7 +77,7 @@
         <br>
         <button class="btn-consultar" onclick="consultar()">Consultar analítico</button>
         <p id="resultado"></p>
-        <button id="btnDescarga" class="btn-descarga" onclick="window.open(urlEncontrada, '_blank')">Descarga PDF</button>
+        <button id="btnDescarga" class="btn-descarga">Descarga PDF</button>
         <button class="btn-salir" onclick="window.close()">Salir</button>
     </div>
 </body>
